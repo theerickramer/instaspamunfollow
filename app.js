@@ -7,15 +7,19 @@ var express = require('express')
 var app = express()
 var user;
 var accessToken; 
+var client_id = process.env.INSTA_ID;
+var client_secret = process.env.INSTA_SECRET
 
 app.get('/', function(req, res) {
-	res.sendFile('./index.html', {'root': 'views'})
+	fs.readFile('./views/index.html', 'utf8', function(err, data){
+			res.send(ejs.render(data, {client_id : client_id}))
+	})
 })
 
 app.get('/auth', function(req, res) {
 	var access_token_request = {
-		client_id: process.env.INSTA_ID,
-		client_secret: process.env.INSTA_SECRET,
+		client_id: client_id,
+		client_secret: client_secret,
 		grant_type: 'authorization_code',
 		redirect_uri: 'http://localhost:3000/auth',
 		code: req.query.code
