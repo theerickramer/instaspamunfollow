@@ -1,14 +1,12 @@
-require('locus')
-var ejs = require('ejs')
-var request = require('request')
-var querystring = require('querystring')
-var fs = require('fs')
-var express = require('express')
-var app = express()
-var user;
-var accessToken; 
+require('locus');
+var ejs = require('ejs');
+var request = require('request');
+var querystring = require('querystring');
+var fs = require('fs');
+var express = require('express');
+var app = express();
 var client_id = process.env.INSTA_ID;
-var client_secret = process.env.INSTA_SECRET
+var client_secret = process.env.INSTA_SECRET;
 
 app.get('/', function(req, res) {
 	fs.readFile('./views/index.html', 'utf8', function(err, data){
@@ -30,11 +28,30 @@ app.get('/auth', function(req, res) {
 		url: 'https://api.instagram.com/oauth/access_token',
 		body: querystring.stringify(access_token_request)
 	}, function(error, response){
-		user = JSON.parse(response.body)
-		accessToken = user.access_token
-		fs.readFile('./views/welcome.html', 'utf8', function(err, data){
-			res.send(ejs.render(data, user))
+		app.locals.user = JSON.parse(response.body)
+		app.locals.accessToken = app.locals.user.access_token
+		fs.readFile('./views/welcome.ejs', 'utf8', function(err, data){
+			res.send(ejs.render(data, app.locals.user))
 		})
+	})
+})
+
+
+app.get('/user/:id/following', function(req, res){
+	request({
+		method: 'GET',
+		url: 'https://api.instagram.com/v1/users/' + req.params.id + '/follows?access_token=' + app.locals.accessToken,
+	}, function(error, response){
+		var follows = JSON.parse(response.body);
+		fs.readFile('./views/follows.ejs', 'utf8', function(err, data){
+			res.send(ejs.render(data, {follows: follows}))
+		})
+	})
+})
+
+app.get('/user/friends', function(req, res){
+	fs.readFile('./views/friends.ejs', 'utf8', function(err, data){
+		res.send(ejs.render(data, friends))
 	})
 })
 

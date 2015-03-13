@@ -8,5 +8,7 @@
 	<h1>Welcome</h1>
 	<img src="<%= user.profile_picture %>">
 	<h2><%= user.username %></h2>
+	<a href="/user/<%= user.id %>/following">see who you're following</a><br>
+	<a href="/user/friends">see your real friends</a>
 </body>
 </html>

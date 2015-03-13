@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Following</title>
+</head>
+<body>
+	<h1>People you are following</h1>
+	<ul>
+		<% follows.data.forEach(function(follow){ %>
+			<li><img src="<%= follow.profile_picture %>"><%= follow.username %> (<%= follow.full_name %>)</li>
+		<% })%>
+	</ul>
+</body>
+</html>
