@@ -1,23 +1,21 @@
-require('locus');
 var ejs = require('ejs');
 var request = require('request');
 var querystring = require('querystring');
-var fs = require('fs');
 var express = require('express');
 var app = express();
-var client_id = process.env.INSTA_ID;
-var client_secret = process.env.INSTA_SECRET;
+app.set('view engine', 'ejs')
+app.locals.client_id = process.env.INSTA_ID;
+app.locals.client_secret = process.env.INSTA_SECRET;
+app.locals.followsUrls = {};
 
 app.get('/', function(req, res) {
-	fs.readFile('./views/index.html', 'utf8', function(err, data){
-			res.send(ejs.render(data, {client_id : client_id}))
-	})
+	res.render('index')
 })
 
 app.get('/auth', function(req, res) {
 	var access_token_request = {
-		client_id: client_id,
-		client_secret: client_secret,
+		client_id: app.locals.client_id,
+		client_secret: app.locals.client_secret,
 		grant_type: 'authorization_code',
 		redirect_uri: 'http://localhost:3000/auth',
 		code: req.query.code
@@ -28,31 +26,41 @@ app.get('/auth', function(req, res) {
 		url: 'https://api.instagram.com/oauth/access_token',
 		body: querystring.stringify(access_token_request)
 	}, function(error, response){
-		app.locals.user = JSON.parse(response.body)
-		app.locals.accessToken = app.locals.user.access_token
-		fs.readFile('./views/welcome.ejs', 'utf8', function(err, data){
-			res.send(ejs.render(data, app.locals.user))
-		})
+		app.locals.user = JSON.parse(response.body).user
+		app.locals.accessToken = JSON.parse(response.body).access_token;
+		res.render('welcome');
 	})
 })
 
 
 app.get('/user/:id/following', function(req, res){
-	request({
-		method: 'GET',
-		url: 'https://api.instagram.com/v1/users/' + req.params.id + '/follows?access_token=' + app.locals.accessToken,
-	}, function(error, response){
-		var follows = JSON.parse(response.body);
-		fs.readFile('./views/follows.ejs', 'utf8', function(err, data){
-			res.send(ejs.render(data, {follows: follows}))
+	app.locals.followsUrls.current = 'https://api.instagram.com/v1/users/' + req.params.id + '/follows?access_token=' + app.locals.accessToken;
+	if (app.locals.followsUrls.next){
+		request({
+			method: 'GET',
+			url: app.locals.followsUrls.next,
+		}, function(error, response){
+			var follows = JSON.parse(response.body);
+			console.log(follows)
+			
+			app.locals.followsUrls.next = follows.pagination.next_url;
+			res.render('follows', {follows: follows})
 		})
-	})
+	} else {
+		request({
+			method: 'GET',
+			url: app.locals.followsUrls.current,
+		}, function(error, response){
+			var follows = JSON.parse(response.body);
+			app.locals.followsUrls.next = follows.pagination.next_url;
+			console.log(follows)
+			res.render('follows', {follows: follows})
+		})
+	}
 })
 
-app.get('/user/friends', function(req, res){
-	fs.readFile('./views/friends.ejs', 'utf8', function(err, data){
-		res.send(ejs.render(data, friends))
-	})
+app.get('/user/:id/friends', function(req, res){
+	res.render('friends')
 })
 
 var server = app.listen(3000, function() {

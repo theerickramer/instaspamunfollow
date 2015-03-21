@@ -6,10 +6,12 @@
 </head>
 <body>
 	<h1>People you are following</h1>
+	<a href="/user/<%=user.id%>/following">NEXT</a>
 	<ul>
 		<% follows.data.forEach(function(follow){ %>
-			<li><img src="<%= follow.profile_picture %>"><%= follow.username %> (<%= follow.full_name %>)</li>
+			<li><a href="http://instagram.com/<%=follow.username %>" target="_blank"><img src="<%= follow.profile_picture %>"></a><a href="http://instagram.com/<%=follow.username %>" target="_blank"><%= follow.username %> (<%= follow.full_name %>)</a><button id="<%= follow.id %>">FRIEND</button></li>
 		<% })%>
 	</ul>
+	<a href="/user/<%=user.id%>/following">NEXT</a>
 </body>
 </html>
