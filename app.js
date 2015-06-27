@@ -1,8 +1,13 @@
 var ejs = require('ejs');
 var request = require('request');
 var querystring = require('querystring');
+var redis = require('redis');
+var redisClient = redis.createClient()
 var express = require('express');
+var bodyParser = require('body-parser')
 var app = express();
+var jsonParser = bodyParser.json();
+// app.use(jsonParser)
 app.set('view engine', 'ejs')
 app.locals.client_id = process.env.INSTA_ID;
 app.locals.client_secret = process.env.INSTA_SECRET;
@@ -41,8 +46,6 @@ app.get('/user/:id/following', function(req, res){
 			url: app.locals.followsUrls.next,
 		}, function(error, response){
 			var follows = JSON.parse(response.body);
-			console.log(follows)
-			
 			app.locals.followsUrls.next = follows.pagination.next_url;
 			res.render('follows', {follows: follows})
 		})
@@ -53,14 +56,22 @@ app.get('/user/:id/following', function(req, res){
 		}, function(error, response){
 			var follows = JSON.parse(response.body);
 			app.locals.followsUrls.next = follows.pagination.next_url;
-			console.log(follows)
 			res.render('follows', {follows: follows})
 		})
 	}
 })
 
 app.get('/user/:id/friends', function(req, res){
-	res.render('friends')
+	redisClient.lrange('friend1', function(err, reply){
+	res.render('friends', {friends: reply})
+	})
+})
+
+app.post('/user/:id/friends', jsonParser, function(req, res){
+	redisClient.lpush('friends', JSON.stringify(req.body), function(){
+		console.log(req.body.id)
+		res.end(req.body.id)
+	})
 })
 
 var server = app.listen(3000, function() {

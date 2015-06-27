@@ -3,6 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Following</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 </head>
 <body>
 	<h1>People you are following</h1>
@@ -14,4 +15,26 @@
 	</ul>
 	<a href="/user/<%=user.id%>/following">NEXT</a>
 </body>
+<script>
+	$('button').click(function(){
+		var userId = window.location.pathname.split('/')[2];
+		var friendId = this.id;
+		var friend = $(this).parent();
+		var name = $(friend).find('a').text();
+		var url = $(friend).find('a').attr('href');
+		var img = $(friend).find('img').attr('src');
+
+		$.ajax({
+			url: '/user/' + userId + '/friends',
+			method: 'POST',
+			data: JSON.stringify({id: friendId, name: name, url: url, img: img}),
+			dataType: 'json',
+			contentType: 'application/json'
+		}).done(function(response){
+			console.log(response)
+			$('#' + response).text('UNFRIEND')
+		});
+		
+	})
+</script>
 </html>
