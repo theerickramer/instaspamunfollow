@@ -62,17 +62,28 @@ app.get('/user/:id/following', function(req, res){
 })
 
 app.get('/user/:id/friends', function(req, res){
-	redisClient.lrange('friend1', function(err, reply){
-	res.render('friends', {friends: reply})
+	redisClient.lrange('friends', '0', '-1', function(err, reply){
+		var friends = [];
+		reply.forEach(function(record){
+			friends.push(JSON.parse(record));
+		});
+		res.render('friends', {friends: friends})
 	})
 })
 
 app.post('/user/:id/friends', jsonParser, function(req, res){
 	redisClient.lpush('friends', JSON.stringify(req.body), function(){
-		console.log(req.body.id)
 		res.end(req.body.id)
 	})
 })
+
+app.delete('/user/:id/friends', jsonParser, function(req, res){
+	console.log(req.body)
+	redisClient.lrem('friends', '1', JSON.stringify(req.body), function(){
+		res.end(req.body.id)
+	})
+})
+
 
 var server = app.listen(3000, function() {
 	var host = server.address().address

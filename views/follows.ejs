@@ -24,17 +24,29 @@
 		var url = $(friend).find('a').attr('href');
 		var img = $(friend).find('img').attr('src');
 
-		$.ajax({
-			url: '/user/' + userId + '/friends',
-			method: 'POST',
-			data: JSON.stringify({id: friendId, name: name, url: url, img: img}),
-			dataType: 'json',
-			contentType: 'application/json'
-		}).done(function(response){
-			console.log(response)
-			$('#' + response).text('UNFRIEND')
-		});
-		
+		if this.text() == 'FRIEND' {
+			$.ajax({
+				url: '/user/' + userId + '/friends',
+				method: 'POST',
+				data: JSON.stringify({id: friendId, name: name, url: url, img: img}),
+				dataType: 'json',
+				contentType: 'application/json'
+			}).done(function(response){
+				console.log(response)
+				$('#' + response).text('UNFRIEND')
+			});
+		} else {
+			$.ajax({
+				url: '/user/' + userId + '/friends',
+				method: 'DELETE',
+				data: JSON.stringify({id: friendId, name: name, url: url, img: img}),
+				dataType: 'json',
+				contentType: 'application/json'
+			}).done(function(response){
+				console.log(response)
+				$('#' + response).text('FRIEND')
+			});
+		}
 	})
 </script>
 </html>
