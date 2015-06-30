@@ -84,6 +84,15 @@ app.delete('/user/:id/friends', jsonParser, function(req, res){
 	})
 })
 
+app.get('/user/:id/friends/unspam', function(req, res){
+	redisClient.lrange('friends', '0', '-1', function(err, reply){
+		var ids = [];
+		reply.forEach(function(record){
+			ids.push(JSON.parse(record).id)
+		})
+		res.json(JSON.stringify(ids))
+	})
+})
 
 var server = app.listen(3000, function() {
 	var host = server.address().address

@@ -24,7 +24,7 @@
 		var url = $(friend).find('a').attr('href');
 		var img = $(friend).find('img').attr('src');
 
-		if this.text() == 'FRIEND' {
+		if ($(this).text() == 'FRIEND') {
 			$.ajax({
 				url: '/user/' + userId + '/friends',
 				method: 'POST',
